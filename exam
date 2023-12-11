@@ -1,0 +1,123 @@
+week 3
+
+import torch
+import matplotlib.pyplot as plt
+import numpy as np
+#Data loading
+import torchvision
+import torchvision.transforms as transforms
+trainset=torchvision.datasets.CIFAR10(root='./data',train=True,
+ download=True,
+ transform=transforms.ToTensor())
+print(trainset)
+classes=('plane','car','brid','cat','deer','dog','frog','horse','ship','truck')
+trainloader=torch.utils.data.DataLoader(trainset,batch_size=4,shuffle=True)
+dataiter=iter(trainloader)
+images,labels=next(dataiter)
+print(images.shape)
+print(images[0].shape)
+print(labels[0].item())
+img=images[1]
+print(type(img))
+npimg=img.numpy()
+print(npimg.shape)
+npimg=np.transpose(npimg,(1,2,0))
+print(npimg.shape)
+plt.figure(figsize=(1,1))
+plt.imshow(npimg)
+plt.show()
+def imshow(img):
+ npimg=img.numpy()
+ plt.imshow(np.transpose(npimg,(1,2,0)))
+ plt.show()
+ imshow(torchvision.utils.make_grid(images))
+print(' '.join(classes[labels[j]] for j in range(4)))
+
+
+===================================================================================================================================================================================
+
+week 4
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+# Generate some example sequential data (you should replace this with your own data)
+# In this example, we&#39;ll use a simple sine wave.
+sequence_length = 100
+timesteps = np.linspace(0, 10, sequence_length)
+data = np.sin(timesteps)
+X = []
+y = []
+for i in range(sequence_length - 1):
+  X.append(data[i:i+1])
+  y.append(data[i+1])
+  X = np.array(X)
+y = np.array(y)
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Build the RNN model
+model = Sequential()
+model.add(SimpleRNN(50, activation='relu', input_shape=(1, 1))) # 50 units in the RNN
+
+model.add(Dense(1)) # Output layer with 1 neuron
+# Compile the model
+model.compile(optimizer='adam', loss='mean_squared_error')
+# Train the model
+history = model.fit(X_train, y_train, epochs=100, batch_size=16, validation_split=0.2)
+# Evaluate the model
+loss = model.evaluate(X_test, y_test)
+print('Test loss: {loss}')
+# Plot training and validation loss
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+# Predict using the trained model
+predicted_values = model.predict(X_test)
+# Plot the actual vs. predicted values
+plt.figure(figsize=(10, 6))
+plt.plot(y_test, label='Actual')
+plt.plot(predicted_values, label='Predicted', linestyle='--')
+plt.xlabel('Time Step')
+plt.ylabel('Value')
+plt.legend()
+plt.show()
+
+
+==================================================================================================================================================================================
+
+week 5
+
+import tensorflow as tf
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense,Flatten
+from tensorflow.keras.utils import to_categorical
+#load the mnist dataset
+(x_train,y_train), (x_test,y_test)=mnist.load_data()
+print(x_train)
+#normalize pixel values to eb between 0 and 1
+x_train, x_test = x_train / 255.0, x_test / 255.0
+#Convert labels to one-hot encoding
+y_train=to_categorical(y_train,num_classes=10)
+y_test=to_categorical(y_test,num_classes=10)
+model=Sequential([
+ Flatten(input_shape=(28, 28)), #Flatten the 28X28 input images
+ Dense(128, activation='relu'), #Fully connected layer with 128 neurons and
+ Dense(64, activation='relu'), #Fully connected layer with 64 neurons and
+ Dense(10, activation='softmax'), #Output layer with 10 neurons for
+])
+#Compile the model
+model.compile(optimizer='adam',
+ loss='categorical_crossentropy',
+ metrics=['accuracy'])
+#Train the model
+model.fit(x_train, y_train, epochs=5, batch_size=32, validation_split=0.2)
+#Evalultion the model on the test data
+test_loss, test_accuracy=model.evaluate(x_test, y_test)
+print(f"Test Accuracy: {test_accuracy}")
